@@ -18,7 +18,6 @@ from database.DAO.UtenteDAO import UtenteDAO
 
 logger = logging.getLogger(__name__)
 
-# (campo_db, giorni_soglia, etichetta, emoji)
 _SCADENZE = [
     ("stato_ringraziamento", GIORNI_RINGRAZIAMENTO, "Ringraziamento", "📬"),
     ("stato_preci",          GIORNI_PRECI,          "Preci",          "🙏"),
@@ -46,8 +45,7 @@ async def job_notifiche_scadenze(ctx: ContextTypes.DEFAULT_TYPE) -> None:
         for campo, soglia, etichetta, emoji in _SCADENZE:
             stato_attuale = getattr(d, campo)
 
-            # Notifica solo se: scadenza superata E stato != fatto
-            if giorni_trascorsi >= soglia and stato_attuale != Stato.FATTO:
+            if giorni_trascorsi >= soglia and stato_attuale not in (Stato.FATTO, Stato.NON_FARE):
                 stato_label = Stato.EMOJI.get(stato_attuale, stato_attuale)
                 testo = (
                     f"⚠️ <b>Scadenza superata</b>\n\n"

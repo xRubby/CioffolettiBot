@@ -31,8 +31,9 @@ class Stato:
     DA_CONFERMARE = "da_confermare"
     CONFERMATO    = "confermato"
     FATTO         = "fatto"
+    NON_FARE      = "non_fare"
  
-    TUTTI:           list[str] = [DA_FARE, DA_CONFERMARE, CONFERMATO, FATTO]
+    TUTTI:           list[str] = [DA_FARE, DA_CONFERMARE, CONFERMATO, FATTO, NON_FARE]
     NON_COMPLETATI:  set[str]  = {DA_FARE, DA_CONFERMARE, CONFERMATO}
  
     EMOJI: dict[str, str] = {
@@ -40,4 +41,5 @@ class Stato:
         DA_CONFERMARE: "🟡 Da confermare",
         CONFERMATO:    "🟢 Confermato",
         FATTO:         "✅ Fatto",
+        NON_FARE:      "⬛ Non fare",
     }
