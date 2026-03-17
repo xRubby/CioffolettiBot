@@ -3,6 +3,8 @@ from database.Connessione import db_connection
 from database.Entity.Defunto import Defunto
 from config import Stato
 
+_CAMPI_TESTUALI = {"nome", "cognome", "data_decesso", "telefono_delegante"}
+
 class DefuntoDAO:
     def _row_to_defunto(self, row) -> Defunto:
         return Defunto(
@@ -45,6 +47,13 @@ class DefuntoDAO:
             raise ValueError(f"Stato non valido: {nuovo_stato!r}")
         with db_connection.connect() as con:
             con.execute(f"UPDATE defunti SET {campo} = ? WHERE id = ?", (nuovo_stato, defunto_id))
+    
+    def aggiorna_campo(self, defunto_id: int, campo: str, valore) -> None:
+        """Aggiorna un campo testuale (nome, cognome, data_decesso, telefono_delegante)."""
+        if campo not in _CAMPI_TESTUALI:
+            raise ValueError(f"Campo non valido: {campo!r}")
+        with db_connection.connect() as con:
+            con.execute(f"UPDATE defunti SET {campo} = ? WHERE id = ?", (valore, defunto_id))
 
     def elimina_defunto(self, defunto_id: int) -> None:
         with db_connection.connect() as con:

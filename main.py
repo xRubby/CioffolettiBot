@@ -14,6 +14,7 @@ from keyboards.impostazioni.admin_settings_menu import (
 from keyboards.defunti.handle_defunti import handler_defunti
 from keyboards.defunti.aggiungi_defunto import conv_aggiungi_defunto
 from keyboards.defunti.lista_defunti import handler_lista_defunti, handler_scheda_defunto
+from keyboards.defunti.modifica_defunto import *
 
 # --- Logging ---
 logging.basicConfig(
@@ -35,15 +36,18 @@ def main():
 
     # ── Defunti ──────────────────────────────────────────────────────────────
     app.add_handler(conv_aggiungi_defunto)
-    app.add_handler(CallbackQueryHandler(handler_defunti, pattern="^defunti$"))
+    app.add_handler(conv_modifica_defunto)  # gestisce menu + tutti i campi
+ 
+    app.add_handler(CallbackQueryHandler(handler_defunti,        pattern="^defunti$"))
     app.add_handler(CallbackQueryHandler(handler_lista_defunti,  pattern=r"^necrologi_lista(_p_\d+)?$"))
     app.add_handler(CallbackQueryHandler(handler_scheda_defunto, pattern=r"^necrologi_scheda_\d+$"))
-
+ 
+    # ── Impostazioni ─────────────────────────────────────────────────────────
     app.add_handler(CallbackQueryHandler(handler_impostazioni, pattern="^impostazioni$"))
-    app.add_handler(CallbackQueryHandler(handler_profilo, pattern="profilo"))
-
+    app.add_handler(CallbackQueryHandler(handler_profilo,      pattern="^profilo$"))
+ 
     app.add_handler(conv_ricerca)
-
+ 
     app.add_handler(CallbackQueryHandler(handler_admin,        pattern="^impostazioni_admin$"))
     app.add_handler(CallbackQueryHandler(handler_pagina_prec,  pattern="^impostazioni_admin_pagina_prec$"))
     app.add_handler(CallbackQueryHandler(handler_pagina_succ,  pattern="^impostazioni_admin_pagina_succ$"))
@@ -51,7 +55,6 @@ def main():
     app.add_handler(CallbackQueryHandler(handler_toggle_admin, pattern=r"^impostazioni_admin_toggle_admin_\d+$"))
     app.add_handler(CallbackQueryHandler(handler_toggle_stato, pattern=r"^impostazioni_admin_toggle_stato_\d+$"))
     app.add_handler(CallbackQueryHandler(handler_menu_principale, pattern="^menu_principale$"))
-
 
     logger.info("Bot Cioffoletti avviato.")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
