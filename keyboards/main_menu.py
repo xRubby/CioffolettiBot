@@ -10,7 +10,7 @@ TESTO_HOME = (
 )
 
 TASTIERA_HOME = InlineKeyboardMarkup([
-    [InlineKeyboardButton("🪦 Defunti", callback_data="defunti")],
+    [InlineKeyboardButton("🪦 Defunti", callback_data="necrologi")],
     [InlineKeyboardButton("⚙️ Impostazioni", callback_data="impostazioni")],
 ])
 
@@ -20,7 +20,7 @@ async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     if not UtenteDAO.get_utente_by_telegram_id(utente.id):
         is_primo = UtenteDAO.conta_utenti() == 0
-        UtenteDAO.aggiungi_utente(telegram_user_id=utente.id, username=utente.username or utente.first_name, is_admin=is_primo)
+        UtenteDAO.aggiungi_utente(telegram_user_id=utente.id, username=utente.username or utente.first_name, is_admin=is_primo, is_active=is_primo)
     else:
         UtenteDAO.aggiorna_nome(utente.id, utente.username or utente.first_name)
 

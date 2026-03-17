@@ -5,7 +5,7 @@ from database.Connessione import db_connection
 class UtenteDAO:
 
     @staticmethod
-    def aggiungi_utente(telegram_user_id: int, username: str | None, is_admin: bool = False, is_active: bool = True) -> None:
+    def aggiungi_utente(telegram_user_id: int, username: str | None, is_admin: bool = False, is_active: bool = False) -> None:
         with db_connection.connect() as con:
             con.execute("""INSERT INTO utenti (telegram_user_id, telegram_username, is_admin, is_active) VALUES (?, ?, ?, ?)""",
                 (telegram_user_id, username, int(is_admin), int(is_active)))

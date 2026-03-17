@@ -196,7 +196,7 @@ async def handler_conferma(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     ctx.user_data.clear()
 
     tastiera = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔙 Torna ai defunti", callback_data="defunti")]
+        [InlineKeyboardButton("🔙 Torna ai defunti", callback_data="necrologi")]
     ])
     await query.edit_message_text("✅ Defunto aggiunto con successo!", reply_markup=tastiera)
     return ConversationHandler.END

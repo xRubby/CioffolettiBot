@@ -16,6 +16,8 @@ from keyboards.defunti.aggiungi_defunto import conv_aggiungi_defunto
 from keyboards.defunti.lista_defunti import handler_lista_defunti, handler_scheda_defunto
 from keyboards.defunti.modifica_defunto import *
 
+from utils.guards import gate_necrologi
+
 # --- Logging ---
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -32,13 +34,15 @@ def main():
     
     app = Application.builder().token(TELEGRAM_TOKEN).build()
 
+    app.add_handler(gate_necrologi, group=-1)
+
     app.add_handler(CommandHandler("start", cmd_start))
 
     # ── Defunti ──────────────────────────────────────────────────────────────
     app.add_handler(conv_aggiungi_defunto)
     app.add_handler(conv_modifica_defunto)  # gestisce menu + tutti i campi
  
-    app.add_handler(CallbackQueryHandler(handler_defunti,        pattern="^defunti$"))
+    app.add_handler(CallbackQueryHandler(handler_defunti,        pattern="^necrologi$"))
     app.add_handler(CallbackQueryHandler(handler_lista_defunti,  pattern=r"^necrologi_lista(_p_\d+)?$"))
     app.add_handler(CallbackQueryHandler(handler_scheda_defunto, pattern=r"^necrologi_scheda_\d+$"))
  

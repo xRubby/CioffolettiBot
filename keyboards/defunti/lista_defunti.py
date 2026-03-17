@@ -30,7 +30,7 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not defunti_pagina and pagina == 0:
         tastiera = InlineKeyboardMarkup([
             [InlineKeyboardButton("➕ Aggiungi defunto", callback_data="necrologi_aggiungi")],
-            [InlineKeyboardButton("🔙 Indietro", callback_data="defunti")],
+            [InlineKeyboardButton("🔙 Indietro", callback_data="necrologi")],
         ])
         await query.edit_message_text(
             "📋 *Lista defunti*\n\nNessun defunto presente.",
@@ -52,7 +52,7 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if nav:
         righe.append(nav)
 
-    righe.append([InlineKeyboardButton("🔙 Indietro", callback_data="defunti")])
+    righe.append([InlineKeyboardButton("🔙 Indietro", callback_data="necrologi")])
 
     await query.edit_message_text(
         f"📋 *Lista defunti* — pagina {pagina + 1} ({totale} totali)",
