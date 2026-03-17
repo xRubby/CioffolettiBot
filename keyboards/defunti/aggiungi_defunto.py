@@ -61,7 +61,7 @@ async def handler_avvia_aggiungi(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
     return NOME
 
 
-# ── Step 2: cognome ───────────────────────────────────────────────────────────
+# ── Step 2: nome ───────────────────────────────────────────────────────────
 
 async def handler_nome(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     nome = update.message.text.strip()
@@ -78,7 +78,7 @@ async def handler_nome(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     return COGNOME
 
 
-# ── Step 3: data decesso ──────────────────────────────────────────────────────
+# ── Step 3: cognome ──────────────────────────────────────────────────────
 
 async def handler_cognome(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     cognome = update.message.text.strip()
@@ -96,7 +96,7 @@ async def handler_cognome(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     return DATA_DECESSO
 
 
-# ── Step 4: telefono ──────────────────────────────────────────────────────────
+# ── Step 4: data decesso ──────────────────────────────────────────────────────────
 
 async def handler_data_decesso(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     testo = update.message.text.strip()
@@ -135,32 +135,7 @@ async def handler_data_oggi(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
                 tastiera=TASTO_TELEFONO)
     return TELEFONO
 
-
-# ── Step 5: riepilogo e conferma ──────────────────────────────────────────────
-
-async def _mostra_riepilogo(ctx: ContextTypes.DEFAULT_TYPE, chat_id: int):
-    d = ctx.user_data
-    telefono_str     = d.get("telefono") or "—"
-    nome_del_str     = d.get("nome_delegante") or "—"
-    note_str         = d.get("note") or "—"
-    testo = (
-        "📋 *Riepilogo*\n\n"
-        f"🪪 Nome:            *{d['nome']}*\n"
-        f"🪪 Cognome:         *{d['cognome']}*\n"
-        f"📅 Decesso:         *{d['data_decesso'].strftime('%d/%m/%Y')}*\n"
-        f"📞 Telefono:        *{telefono_str}*\n"
-        f"👤 Delegante:       *{nome_del_str}*\n"
-        f"📝 Note:            *{note_str}*\n\n"
-        "Confermi l'inserimento?"
-    )
-    tastiera = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("✅ Conferma", callback_data="necrologi_aggiungi_conferma"),
-            InlineKeyboardButton("❌ Annulla",  callback_data="necrologi_aggiungi_annulla"),
-        ]
-    ])
-    await _edit(ctx, chat_id, testo, tastiera=tastiera)
-
+# ── Step 4: telefono delegante ──────────────────────────────────────────────
 
 async def handler_telefono(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     telefono = update.message.text.strip()
@@ -228,6 +203,31 @@ async def handler_salta_note(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     ctx.user_data["note"] = None
     await _mostra_riepilogo(ctx, update.effective_chat.id)
     return CONFERMA
+
+# ── Step 7: riepilogo e conferma ──────────────────────────────────────────────
+
+async def _mostra_riepilogo(ctx: ContextTypes.DEFAULT_TYPE, chat_id: int):
+    d = ctx.user_data
+    telefono_str     = d.get("telefono") or "—"
+    nome_del_str     = d.get("nome_delegante") or "—"
+    note_str         = d.get("note") or "—"
+    testo = (
+        "📋 *Riepilogo*\n\n"
+        f"🪪 Nome:            *{d['nome']}*\n"
+        f"🪪 Cognome:         *{d['cognome']}*\n"
+        f"📅 Decesso:         *{d['data_decesso'].strftime('%d/%m/%Y')}*\n"
+        f"📞 Telefono:        *{telefono_str}*\n"
+        f"👤 Delegante:       *{nome_del_str}*\n"
+        f"📝 Note:            *{note_str}*\n\n"
+        "Confermi l'inserimento?"
+    )
+    tastiera = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("✅ Conferma", callback_data="necrologi_aggiungi_conferma"),
+            InlineKeyboardButton("❌ Annulla",  callback_data="necrologi_aggiungi_annulla"),
+        ]
+    ])
+    await _edit(ctx, chat_id, testo, tastiera=tastiera)
 
 # ── Conferma: salvataggio ─────────────────────────────────────────────────────
 
