@@ -28,9 +28,11 @@ async def _edit(ctx: ContextTypes.DEFAULT_TYPE, chat_id: int, testo: str,
 def _tastiera_menu_modifica(defunto_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("✏️ Nome",             callback_data=f"necrologi_mod_nome_{defunto_id}"),
-         InlineKeyboardButton("✏️ Cognome",          callback_data=f"necrologi_mod_cognome_{defunto_id}")],
-        [InlineKeyboardButton("📅 Data decesso",     callback_data=f"necrologi_mod_data_{defunto_id}"),
-         InlineKeyboardButton("📞 Telefono",         callback_data=f"necrologi_mod_telefono_{defunto_id}")],
+         InlineKeyboardButton("✏️ Cognome",          callback_data=f"necrologi_mod_cognome_{defunto_id}"),
+        InlineKeyboardButton("📅 Data decesso",     callback_data=f"necrologi_mod_data_{defunto_id}")],
+        [InlineKeyboardButton("📞 Telefono",         callback_data=f"necrologi_mod_telefono_{defunto_id}"),
+        InlineKeyboardButton("👤 Delegante",        callback_data=f"necrologi_mod_delegante_{defunto_id}"),
+         InlineKeyboardButton("📝 Note",             callback_data=f"necrologi_mod_note_{defunto_id}")],
         [InlineKeyboardButton("📬 Ringraziamento",   callback_data=f"necrologi_mod_ringraziamento_{defunto_id}"),
          InlineKeyboardButton("🙏 Preci",            callback_data=f"necrologi_mod_preci_{defunto_id}"),
          InlineKeyboardButton("📿 Trigesimo",        callback_data=f"necrologi_mod_trigesimo_{defunto_id}")],
@@ -172,6 +174,29 @@ async def handler_mod_trigesimo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     )
     return MENU
 
+async def handler_mod_delegante(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    defunto_id = int(query.data.split("_")[-1])
+    ctx.user_data["modifica_defunto_id"] = defunto_id
+    ctx.user_data["modifica_campo"] = "nome_delegante"
+    await _edit(ctx, update.effective_chat.id,
+                "✏️ *Modifica Nome delegante*\n\nInvia il nuovo nome, o `nessuno` per rimuoverlo:",
+                tastiera=_tastiera_annulla(defunto_id))
+    return ATTESA_VALORE
+
+
+async def handler_mod_note(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    defunto_id = int(query.data.split("_")[-1])
+    ctx.user_data["modifica_defunto_id"] = defunto_id
+    ctx.user_data["modifica_campo"] = "note"
+    await _edit(ctx, update.effective_chat.id,
+                "✏️ *Modifica Note*\n\nInvia le nuove note, o `nessuno` per rimuoverle:",
+                tastiera=_tastiera_annulla(defunto_id))
+    return ATTESA_VALORE
+
 
 async def handler_salva_stato(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     """Callback: necrologi_mod_stato_{campo}_{stato}_{defunto_id}"""
@@ -288,6 +313,14 @@ async def handler_ricevi_valore(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         else:
             dao.aggiorna_campo(defunto_id, "telefono_delegante", testo)
 
+    elif campo == "nome_delegante":
+        dao.aggiorna_campo(defunto_id, "nome_delegante",
+                        None if testo.lower() == "nessuno" else testo.title())
+
+    elif campo == "note":
+        dao.aggiorna_campo(defunto_id, "note",
+                        None if testo.lower() == "nessuno" else testo)
+
     await _mostra_menu(ctx, chat_id, defunto_id, prefisso="✅ *Salvato!*\n\n")
     return MENU
 
@@ -311,6 +344,8 @@ conv_modifica_defunto = ConversationHandler(
             CallbackQueryHandler(handler_elimina_chiedi,     pattern=r"^necrologi_elimina_chiedi_\d+$"),
             CallbackQueryHandler(handler_elimina_conferma,   pattern=r"^necrologi_elimina_conferma_\d+$"),
             CallbackQueryHandler(handler_menu_modifica,      pattern=r"^necrologi_modifica_\d+$"),
+            CallbackQueryHandler(handler_mod_delegante,      pattern=r"^necrologi_mod_delegante_\d+$"),
+            CallbackQueryHandler(handler_mod_note,           pattern=r"^necrologi_mod_note_\d+$"),
         ],
         ATTESA_VALORE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, handler_ricevi_valore),

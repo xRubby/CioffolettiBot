@@ -3,7 +3,7 @@ from database.Connessione import db_connection
 from database.Entity.Defunto import Defunto
 from config import Stato
 
-_CAMPI_TESTUALI = {"nome", "cognome", "data_decesso", "telefono_delegante"}
+_CAMPI_TESTUALI = {"nome", "cognome", "data_decesso", "telefono_delegante", "nome_delegante", "note"}
 
 class DefuntoDAO:
     def _row_to_defunto(self, row) -> Defunto:
@@ -13,6 +13,8 @@ class DefuntoDAO:
             cognome=row["cognome"],
             data_decesso=date.fromisoformat(row["data_decesso"]),
             telefono_delegante=row["telefono_delegante"],
+            nome_delegante=row["nome_delegante"],
+            note=row["note"],
             creato_il=date.fromisoformat(row["creato_il"]),
             aggiunto_da=row["aggiunto_da"],
             stato_ringraziamento=row["stato_ringraziamento"],
@@ -20,14 +22,18 @@ class DefuntoDAO:
             stato_trigesimo=row["stato_trigesimo"],
         )
 
-    def add_defunto(self, nome: str, cognome: str, data_decesso: date, telefono_delegante: str, aggiunto_da: int) -> None:
+    def add_defunto(self, nome: str, cognome: str, data_decesso: date,
+                    telefono_delegante: str, aggiunto_da: int,
+                    nome_delegante: str | None = None, note: str | None = None) -> None:
         with db_connection.connect() as con:
             con.execute(
                 """
-                INSERT INTO defunti (nome, cognome, data_decesso, telefono_delegante, aggiunto_da)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO defunti (nome, cognome, data_decesso, telefono_delegante,
+                                     nome_delegante, note, aggiunto_da)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (nome, cognome, data_decesso.isoformat(), telefono_delegante, aggiunto_da)
+                (nome, cognome, data_decesso.isoformat(), telefono_delegante,
+                 nome_delegante, note, aggiunto_da)
             )
 
     def get_defunto(self, defunto_id: int) -> Defunto | None:

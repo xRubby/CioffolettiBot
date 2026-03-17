@@ -86,15 +86,20 @@ async def handler_scheda_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
 
     telefono_str = d.telefono_delegante if d.telefono_delegante else "—"
 
+    nome_del_str = d.nome_delegante if d.nome_delegante else "—"
+    note_str     = d.note if d.note else "—"
+
     testo = (
         f"🪦 <b>{d.cognome} {d.nome}</b>\n\n"
         f"📅 <b>Data decesso:</b> {d.data_decesso.strftime('%d/%m/%Y')}\n"
         f"📞 <b>Telefono delegante:</b> {telefono_str}\n"
+        f"👤 <b>Nome delegante:</b> {nome_del_str}\n"
         f"🗓 <b>Inserito il:</b> {d.creato_il.strftime('%d/%m/%Y')}\n"
         f"👤 <b>Aggiunto da:</b> {aggiunto_da_str}\n\n"
         f"📬 <b>Ringraziamento:</b> {Stato.EMOJI[d.stato_ringraziamento]}\n"
         f"🙏 <b>Preci:</b> {Stato.EMOJI[d.stato_preci]}\n"
-        f"📿 <b>Trigesimo:</b> {Stato.EMOJI[d.stato_trigesimo]}\n"
+        f"📿 <b>Trigesimo:</b> {Stato.EMOJI[d.stato_trigesimo]}\n\n"
+        f"📝 <b>Note:</b> {note_str}\n"
     )
 
     pagina = ctx.user_data.get("lista_defunti_pagina", 0)

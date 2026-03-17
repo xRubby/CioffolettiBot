@@ -10,7 +10,7 @@ from database.DAO.UtenteDAO import UtenteDAO
 from keyboards.defunti.handle_defunti import handler_defunti
 
 # Stati della conversazione
-NOME, COGNOME, DATA_DECESSO, TELEFONO, CONFERMA = range(5)
+NOME, COGNOME, DATA_DECESSO, TELEFONO, NOME_DELEGANTE, NOTE, CONFERMA = range(7)
 
 TASTO_ANNULLA = InlineKeyboardMarkup([
     [InlineKeyboardButton("❌ Annulla", callback_data="necrologi_aggiungi_annulla")]
@@ -23,6 +23,11 @@ TASTO_DATA = InlineKeyboardMarkup([
 
 TASTO_TELEFONO = InlineKeyboardMarkup([
     [InlineKeyboardButton("🚫 Nessuno", callback_data="necrologi_aggiungi_tel_nessuno")],
+    [InlineKeyboardButton("❌ Annulla", callback_data="necrologi_aggiungi_annulla")],
+])
+
+TASTO_SKIP_ANNULLA = InlineKeyboardMarkup([
+    [InlineKeyboardButton("⏭ Salta", callback_data="necrologi_aggiungi_salta")],
     [InlineKeyboardButton("❌ Annulla", callback_data="necrologi_aggiungi_annulla")],
 ])
 
@@ -48,7 +53,7 @@ async def handler_avvia_aggiungi(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
 
     msg = await query.edit_message_text(
         "➕ *Aggiungi defunto*\n\n"
-        "Passo 1/4 — Inserisci il *nome*:",
+        "Passo 1/6 — Inserisci il *nome*:",
         parse_mode="Markdown",
         reply_markup=TASTO_ANNULLA,
     )
@@ -64,12 +69,12 @@ async def handler_nome(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     if not nome:
         await _edit(ctx, update.effective_chat.id,
-                    "⚠️ Il nome non può essere vuoto. Riprova:\n\nPasso 1/4 — Inserisci il *nome*:")
+                    "⚠️ Il nome non può essere vuoto. Riprova:\n\nPasso 1/6 — Inserisci il *nome*:")
         return NOME
 
     ctx.user_data["nome"] = nome.title()
     await _edit(ctx, update.effective_chat.id,
-                "Passo 2/4 — Inserisci il *cognome*:")
+                "Passo 2/6 — Inserisci il *cognome*:")
     return COGNOME
 
 
@@ -81,12 +86,12 @@ async def handler_cognome(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     if not cognome:
         await _edit(ctx, update.effective_chat.id,
-                    "⚠️ Il cognome non può essere vuoto. Riprova:\n\nPasso 2/4 — Inserisci il *cognome*:")
+                    "⚠️ Il cognome non può essere vuoto. Riprova:\n\nPasso 2/6 — Inserisci il *cognome*:")
         return COGNOME
 
     ctx.user_data["cognome"] = cognome.title()
     await _edit(ctx, update.effective_chat.id,
-                "Passo 3/4 — Inserisci la *data di decesso* (GG/MM/AAAA):",
+                "Passo 3/6 — Inserisci la *data di decesso* (GG/MM/AAAA):",
                 tastiera=TASTO_DATA)
     return DATA_DECESSO
 
@@ -103,14 +108,14 @@ async def handler_data_decesso(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     except (ValueError, TypeError):
         await _edit(ctx, update.effective_chat.id,
                     "⚠️ Formato non valido. Inserisci la data come *GG/MM/AAAA* (es. 15/03/2025):\n\n"
-                    "Passo 3/4 — Inserisci la *data di decesso*:",
+                    "Passo 3/6 — Inserisci la *data di decesso*:",
                     tastiera=TASTO_DATA)
         return DATA_DECESSO
 
     if data > date.today():
         await _edit(ctx, update.effective_chat.id,
                     "⚠️ La data non può essere nel futuro. Riprova:\n\n"
-                    "Passo 3/4 — Inserisci la *data di decesso* (GG/MM/AAAA):",
+                    "Passo 3/6 — Inserisci la *data di decesso* (GG/MM/AAAA):",
                     tastiera=TASTO_DATA)
         return DATA_DECESSO
 
@@ -126,7 +131,7 @@ async def handler_data_oggi(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     ctx.user_data["data_decesso"] = date.today()
     await _edit(ctx, update.effective_chat.id,
-                "Passo 4/4 — Inserisci il *telefono del delegante*:",
+                "Passo 4/6 — Inserisci il *telefono del delegante*:",
                 tastiera=TASTO_TELEFONO)
     return TELEFONO
 
@@ -135,13 +140,17 @@ async def handler_data_oggi(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 async def _mostra_riepilogo(ctx: ContextTypes.DEFAULT_TYPE, chat_id: int):
     d = ctx.user_data
-    telefono_str = d["telefono"] if d["telefono"] else "—"
+    telefono_str     = d.get("telefono") or "—"
+    nome_del_str     = d.get("nome_delegante") or "—"
+    note_str         = d.get("note") or "—"
     testo = (
         "📋 *Riepilogo*\n\n"
-        f"🪪 Nome:      *{d['nome']}*\n"
-        f"🪪 Cognome:   *{d['cognome']}*\n"
-        f"📅 Decesso:   *{d['data_decesso'].strftime('%d/%m/%Y')}*\n"
-        f"📞 Telefono:  *{telefono_str}*\n\n"
+        f"🪪 Nome:            *{d['nome']}*\n"
+        f"🪪 Cognome:         *{d['cognome']}*\n"
+        f"📅 Decesso:         *{d['data_decesso'].strftime('%d/%m/%Y')}*\n"
+        f"📞 Telefono:        *{telefono_str}*\n"
+        f"👤 Delegante:       *{nome_del_str}*\n"
+        f"📝 Note:            *{note_str}*\n\n"
         "Confermi l'inserimento?"
     )
     tastiera = InlineKeyboardMarkup([
@@ -160,22 +169,65 @@ async def handler_telefono(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not telefono.lstrip("+").isdigit() or len(telefono) < 6:
         await _edit(ctx, update.effective_chat.id,
                     "⚠️ Numero non valido. Inserisci solo cifre (es. 3331234567):\n\n"
-                    "Passo 4/4 — Inserisci il *telefono del delegante*:",
+                    "Passo 4/6 — Inserisci il *telefono del delegante*:",
                     tastiera=TASTO_TELEFONO)
         return TELEFONO
 
     ctx.user_data["telefono"] = telefono
-    await _mostra_riepilogo(ctx, update.effective_chat.id)
-    return CONFERMA
+    await _edit(ctx, update.effective_chat.id,
+                "Passo 5/6 — Inserisci il *nome del delegante*:",
+                tastiera=TASTO_SKIP_ANNULLA)
+    return NOME_DELEGANTE
 
 
 async def handler_tel_nessuno(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     ctx.user_data["telefono"] = None
+    ctx.user_data["nome_delegante"] = None
+    await _edit(ctx, update.effective_chat.id,
+                "Passo 6/6 — Inserisci eventuali *note*:",
+                tastiera=TASTO_SKIP_ANNULLA)
+    return NOTE
+
+# ── Step 5: nome delegante ────────────────────────────────────────────────────
+
+async def handler_nome_delegante(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    testo = update.message.text.strip()
+    await update.message.delete()
+    ctx.user_data["nome_delegante"] = testo.title() if testo else None
+    await _edit(ctx, update.effective_chat.id,
+                "Passo 6/6 — Inserisci eventuali *note*:",
+                tastiera=TASTO_SKIP_ANNULLA)
+    return NOTE
+
+
+async def handler_salta_nome_delegante(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    ctx.user_data["nome_delegante"] = None
+    await _edit(ctx, update.effective_chat.id,
+                "Passo 6/6 — Inserisci eventuali *note*:",
+                tastiera=TASTO_SKIP_ANNULLA)
+    return NOTE
+
+
+# ── Step 6: note ──────────────────────────────────────────────────────────────
+
+async def handler_note(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    testo = update.message.text.strip()
+    await update.message.delete()
+    ctx.user_data["note"] = testo if testo else None
     await _mostra_riepilogo(ctx, update.effective_chat.id)
     return CONFERMA
 
+
+async def handler_salta_note(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    ctx.user_data["note"] = None
+    await _mostra_riepilogo(ctx, update.effective_chat.id)
+    return CONFERMA
 
 # ── Conferma: salvataggio ─────────────────────────────────────────────────────
 
@@ -191,6 +243,8 @@ async def handler_conferma(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         cognome=d["cognome"],
         data_decesso=d["data_decesso"],
         telefono_delegante=d["telefono"],
+        nome_delegante=d.get("nome_delegante"),
+        note=d.get("note"),
         aggiunto_da=utente.id,
     )
     ctx.user_data.clear()
@@ -216,9 +270,7 @@ async def handler_annulla(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 # ── ConversationHandler ───────────────────────────────────────────────────────
 
 conv_aggiungi_defunto = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(handler_avvia_aggiungi, pattern="^necrologi_aggiungi$")
-    ],
+    entry_points=[CallbackQueryHandler(handler_avvia_aggiungi, pattern="^necrologi_aggiungi$")],
     states={
         NOME:         [MessageHandler(filters.TEXT & ~filters.COMMAND, handler_nome)],
         COGNOME:      [MessageHandler(filters.TEXT & ~filters.COMMAND, handler_cognome)],
@@ -230,14 +282,20 @@ conv_aggiungi_defunto = ConversationHandler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, handler_telefono),
             CallbackQueryHandler(handler_tel_nessuno, pattern="^necrologi_aggiungi_tel_nessuno$"),
         ],
+        NOME_DELEGANTE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handler_nome_delegante),
+            CallbackQueryHandler(handler_salta_nome_delegante, pattern="^necrologi_aggiungi_salta$"),
+        ],
+        NOTE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handler_note),
+            CallbackQueryHandler(handler_salta_note, pattern="^necrologi_aggiungi_salta$"),
+        ],
         CONFERMA: [
             CallbackQueryHandler(handler_conferma, pattern="^necrologi_aggiungi_conferma$"),
             CallbackQueryHandler(handler_annulla,  pattern="^necrologi_aggiungi_annulla$"),
         ],
     },
-    fallbacks=[
-        CallbackQueryHandler(handler_annulla, pattern="^necrologi_aggiungi_annulla$")
-    ],
+    fallbacks=[CallbackQueryHandler(handler_annulla, pattern="^necrologi_aggiungi_annulla$")],
     per_message=False,
     per_chat=True,
 )
