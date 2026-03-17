@@ -40,10 +40,12 @@ class DefuntoDAO:
         with db_connection.connect() as con:
             row = con.execute("SELECT * FROM defunti WHERE id = ?", (defunto_id,)).fetchone()
             return self._row_to_defunto(row) if row else None
-
+        
     def get_tutti_defunti(self) -> list[Defunto]:
         with db_connection.connect() as con:
-            rows = con.execute("SELECT * FROM defunti").fetchall()
+            rows = con.execute(
+                "SELECT * FROM defunti ORDER BY data_decesso DESC"
+            ).fetchall()
             return [self._row_to_defunto(row) for row in rows]
 
     def aggiorna_stato(self, defunto_id: int, campo: str, nuovo_stato: str) -> None:
