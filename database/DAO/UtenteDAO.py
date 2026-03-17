@@ -77,3 +77,9 @@ class UtenteDAO:
                 "UPDATE utenti SET telegram_username = ? WHERE telegram_user_id = ?",
                 (nuovo_nome, telegram_user_id)
             )
+
+    @staticmethod
+    def get_utenti_attivi() -> list[Utente]:
+        with db_connection.connect() as con:
+            rows = con.execute("SELECT * FROM utenti WHERE is_active = 1").fetchall()
+            return [Utente(**row) for row in rows]

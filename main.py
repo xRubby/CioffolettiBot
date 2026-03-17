@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, JobQueue
 import logging
 from config import TELEGRAM_TOKEN
 from database.Connessione import db_connection
@@ -17,6 +17,10 @@ from keyboards.defunti.lista_defunti import handler_lista_defunti, handler_sched
 from keyboards.defunti.modifica_defunto import *
 
 from utils.guards import gate_necrologi
+
+from zoneinfo import ZoneInfo
+from config import NOTIFICA_ORA, NOTIFICA_MINUTO, TIMEZONE
+from utils.notifiche import job_notifiche_scadenze
 
 # --- Logging ---
 logging.basicConfig(
@@ -62,6 +66,17 @@ def main():
 
     logger.info("Bot Cioffoletti avviato.")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
+
+    job_queue: JobQueue = app.job_queue
+    job_queue.run_daily(
+        job_notifiche_scadenze,
+        time=__import__("datetime").time(
+            hour=NOTIFICA_ORA,
+            minute=NOTIFICA_MINUTO,
+            tzinfo=ZoneInfo(TIMEZONE),
+        ),
+        name="notifiche_scadenze",
+    )
  
  
 if __name__ == "__main__":
