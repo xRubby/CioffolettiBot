@@ -10,7 +10,7 @@ TESTO_HOME = (
 )
 
 TASTIERA_HOME = InlineKeyboardMarkup([
-    [InlineKeyboardButton("📋 Visualizza necrologi", callback_data="necrologi")],
+    [InlineKeyboardButton("🪦 Defunti", callback_data="defunti")],
     [InlineKeyboardButton("⚙️ Impostazioni", callback_data="impostazioni")],
 ])
 

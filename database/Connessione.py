@@ -55,7 +55,7 @@ class DatabaseConnection:
                     nome                  TEXT    NOT NULL,
                     cognome               TEXT    NOT NULL,
                     data_decesso          TEXT    NOT NULL,
-                    telefono_delegante    TEXT    NOT NULL,
+                    telefono_delegante    TEXT,
                     stato_ringraziamento  TEXT    NOT NULL DEFAULT 'da_fare',
                     stato_preci           TEXT    NOT NULL DEFAULT 'da_fare',
                     stato_trigesimo       TEXT    NOT NULL DEFAULT 'da_fare',
