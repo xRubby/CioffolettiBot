@@ -13,6 +13,7 @@ from keyboards.impostazioni.admin_settings_menu import (
 )
 from keyboards.defunti.handle_defunti import handler_defunti
 from keyboards.defunti.aggiungi_defunto import conv_aggiungi_defunto
+from keyboards.defunti.lista_defunti import handler_lista_defunti, handler_scheda_defunto
 
 # --- Logging ---
 logging.basicConfig(
@@ -35,6 +36,8 @@ def main():
     # ── Defunti ──────────────────────────────────────────────────────────────
     app.add_handler(conv_aggiungi_defunto)
     app.add_handler(CallbackQueryHandler(handler_defunti, pattern="^defunti$"))
+    app.add_handler(CallbackQueryHandler(handler_lista_defunti,  pattern=r"^necrologi_lista(_p_\d+)?$"))
+    app.add_handler(CallbackQueryHandler(handler_scheda_defunto, pattern=r"^necrologi_scheda_\d+$"))
 
     app.add_handler(CallbackQueryHandler(handler_impostazioni, pattern="^impostazioni$"))
     app.add_handler(CallbackQueryHandler(handler_profilo, pattern="profilo"))
