@@ -1,0 +1,51 @@
+from datetime import date
+from database.Connessione import db_connection
+from database.Entity.Defunto import Defunto
+from config import Stato
+
+class DefuntoDAO:
+    def _row_to_defunto(self, row) -> Defunto:
+        return Defunto(
+            id=row["id"],
+            nome=row["nome"],
+            cognome=row["cognome"],
+            data_decesso=date.fromisoformat(row["data_decesso"]),
+            telefono_delegante=row["telefono_delegante"],
+            creato_il=date.fromisoformat(row["creato_il"]),
+            aggiunto_da=row["aggiunto_da"],
+            stato_ringraziamento=row["stato_ringraziamento"],
+            stato_preci=row["stato_preci"],
+            stato_trigesimo=row["stato_trigesimo"],
+        )
+
+    def add_defunto(self, nome: str, cognome: str, data_decesso: date, telefono_delegante: str, aggiunto_da: int) -> None:
+        with db_connection.connect() as con:
+            con.execute(
+                """
+                INSERT INTO defunti (nome, cognome, data_decesso, telefono_delegante, aggiunto_da)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (nome, cognome, data_decesso.isoformat(), telefono_delegante, aggiunto_da)
+            )
+
+    def get_defunto(self, defunto_id: int) -> Defunto | None:
+        with db_connection.connect() as con:
+            row = con.execute("SELECT * FROM defunti WHERE id = ?", (defunto_id,)).fetchone()
+            return self._row_to_defunto(row) if row else None
+
+    def get_tutti_defunti(self) -> list[Defunto]:
+        with db_connection.connect() as con:
+            rows = con.execute("SELECT * FROM defunti").fetchall()
+            return [self._row_to_defunto(row) for row in rows]
+
+    def aggiorna_stato(self, defunto_id: int, campo: str, nuovo_stato: str) -> None:
+        if campo not in ("stato_ringraziamento", "stato_preci", "stato_trigesimo"):
+            raise ValueError(f"Campo non valido: {campo!r}")
+        if nuovo_stato not in Stato.TUTTI:
+            raise ValueError(f"Stato non valido: {nuovo_stato!r}")
+        with db_connection.connect() as con:
+            con.execute(f"UPDATE defunti SET {campo} = ? WHERE id = ?", (nuovo_stato, defunto_id))
+
+    def elimina_defunto(self, defunto_id: int) -> None:
+        with db_connection.connect() as con:
+            con.execute("DELETE FROM defunti WHERE id = ?", (defunto_id,))
