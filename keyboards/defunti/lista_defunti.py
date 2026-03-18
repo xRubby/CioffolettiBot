@@ -1,11 +1,15 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram.ext import (
+    ContextTypes, ConversationHandler,
+    MessageHandler, CallbackQueryHandler, filters
+)
 
 from database.DAO.DefuntoDAO import DefuntoDAO
 from database.DAO.UtenteDAO import UtenteDAO
 from config import Stato
 
 PAGINA_SIZE = 5
+ATTESA_RICERCA_DEFUNTO = 1
 
 
 # ── Lista defunti paginata ────────────────────────────────────────────────────
@@ -40,6 +44,7 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         return
 
     righe = []
+    righe.append([InlineKeyboardButton("🔍 Cerca defunto", callback_data="necrologi_cerca_defunto")])
     for d in defunti_pagina:
         label = f"🪦 {d.cognome} {d.nome} — {d.data_decesso.strftime('%d/%m/%Y')}"
         righe.append([InlineKeyboardButton(label, callback_data=f"necrologi_scheda_{d.id}")])
@@ -52,6 +57,7 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if nav:
         righe.append(nav)
 
+    
     righe.append([InlineKeyboardButton("🔙 Indietro", callback_data="necrologi")])
 
     await query.edit_message_text(
@@ -59,6 +65,80 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(righe),
     )
+
+
+# ── Ricerca defunti ───────────────────────────────────────────────────────────
+
+async def handler_avvia_ricerca_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    tastiera = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔙 Lista defunti", callback_data="necrologi_lista")]
+    ])
+    msg = await query.edit_message_text(
+        "🔍 Scrivi il nome, cognome o entrambi da cercare:",
+        reply_markup=tastiera,
+    )
+    ctx.user_data["ricerca_defunto_msg_id"] = msg.message_id
+    return ATTESA_RICERCA_DEFUNTO
+
+
+async def handler_esegui_ricerca_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    testo = update.message.text.strip()
+    await update.message.delete()
+
+    message_id = ctx.user_data.pop("ricerca_defunto_msg_id", None)
+    defunti = DefuntoDAO().cerca_defunti(testo)
+
+    tastiera_back = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔙 Lista defunti", callback_data="necrologi_lista")]
+    ])
+
+    if not defunti:
+        await ctx.bot.edit_message_text(
+            chat_id=update.effective_chat.id,
+            message_id=message_id,
+            text=f"Nessun defunto trovato per *{testo}*.",
+            parse_mode="Markdown",
+            reply_markup=tastiera_back,
+        )
+        return ConversationHandler.END
+
+    righe = []
+    for d in defunti:
+        label = f"🪦 {d.cognome} {d.nome} — {d.data_decesso.strftime('%d/%m/%Y')}"
+        righe.append([InlineKeyboardButton(label, callback_data=f"necrologi_scheda_{d.id}")])
+    righe.append([InlineKeyboardButton("🔙 Lista defunti", callback_data="necrologi_lista")])
+
+    await ctx.bot.edit_message_text(
+        chat_id=update.effective_chat.id,
+        message_id=message_id,
+        text=f"🔍 Risultati per *{testo}* ({len(defunti)} trovati):",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(righe),
+    )
+    return ConversationHandler.END
+
+
+async def _annulla_ricerca_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    ctx.user_data.pop("ricerca_defunto_msg_id", None)
+    await handler_lista_defunti(update, ctx)
+    return ConversationHandler.END
+
+
+conv_ricerca_defunto = ConversationHandler(
+    entry_points=[CallbackQueryHandler(handler_avvia_ricerca_defunto, pattern="^necrologi_cerca_defunto$")],
+    states={
+        ATTESA_RICERCA_DEFUNTO: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handler_esegui_ricerca_defunto),
+            CallbackQueryHandler(_annulla_ricerca_defunto, pattern=r"^necrologi_lista(_p_\d+)?$"),
+        ]
+    },
+    fallbacks=[],
+    per_message=False,
+    per_chat=True,
+)
 
 
 # ── Scheda singolo defunto ────────────────────────────────────────────────────

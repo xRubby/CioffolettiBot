@@ -66,3 +66,23 @@ class DefuntoDAO:
     def elimina_defunto(self, defunto_id: int) -> None:
         with db_connection.connect() as con:
             con.execute("DELETE FROM defunti WHERE id = ?", (defunto_id,))
+    
+    def cerca_defunti(self, query: str) -> list[Defunto]:
+        termini = query.strip().split()
+        with db_connection.connect() as con:
+            if len(termini) == 1:
+                t = f"%{termini[0]}%"
+                rows = con.execute(
+                    "SELECT * FROM defunti WHERE nome LIKE ? OR cognome LIKE ? ORDER BY data_decesso DESC",
+                    (t, t)
+                ).fetchall()
+            else:
+                a, b = f"%{termini[0]}%", f"%{termini[1]}%"
+                rows = con.execute(
+                    """SELECT * FROM defunti WHERE
+                    (nome LIKE ? AND cognome LIKE ?) OR
+                    (nome LIKE ? AND cognome LIKE ?)
+                    ORDER BY data_decesso DESC""",
+                    (a, b, b, a)
+                ).fetchall()
+        return [self._row_to_defunto(row) for row in rows]

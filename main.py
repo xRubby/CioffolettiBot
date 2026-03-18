@@ -13,7 +13,7 @@ from keyboards.impostazioni.admin_settings_menu import (
 )
 from keyboards.defunti.handle_defunti import handler_defunti
 from keyboards.defunti.aggiungi_defunto import conv_aggiungi_defunto
-from keyboards.defunti.lista_defunti import handler_lista_defunti, handler_scheda_defunto
+from keyboards.defunti.lista_defunti import *
 from keyboards.defunti.modifica_defunto import *
 
 from utils.guards import gate_necrologi
@@ -56,8 +56,9 @@ def main():
     app.add_handler(CommandHandler("start", cmd_start))
 
     # ── Defunti ──────────────────────────────────────────────────────────────
+    app.add_handler(conv_ricerca_defunto) 
     app.add_handler(conv_aggiungi_defunto)
-    app.add_handler(conv_modifica_defunto)  # gestisce menu + tutti i campi
+    app.add_handler(conv_modifica_defunto)
  
     app.add_handler(CallbackQueryHandler(handler_defunti,        pattern="^necrologi$"))
     app.add_handler(CallbackQueryHandler(handler_lista_defunti,  pattern=r"^necrologi_lista(_p_\d+)?$"))
