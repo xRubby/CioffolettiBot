@@ -48,6 +48,19 @@ class DefuntoDAO:
             ).fetchall()
             return [self._row_to_defunto(row) for row in rows]
 
+    def conta_defunti(self) -> int:
+        with db_connection.connect() as con:
+            row = con.execute("SELECT COUNT(*) FROM defunti").fetchone()
+            return row[0]
+
+    def get_defunti_paginati(self, offset: int, limit: int = 5) -> list[Defunto]:
+        with db_connection.connect() as con:
+            rows = con.execute(
+                "SELECT * FROM defunti ORDER BY data_decesso DESC LIMIT ? OFFSET ?",
+                (limit, offset)
+            ).fetchall()
+            return [self._row_to_defunto(row) for row in rows]
+
     def aggiorna_stato(self, defunto_id: int, campo: str, nuovo_stato: str) -> None:
         if campo not in ("stato_ringraziamento", "stato_preci", "stato_trigesimo"):
             raise ValueError(f"Campo non valido: {campo!r}")

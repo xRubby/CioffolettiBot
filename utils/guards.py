@@ -5,7 +5,7 @@ from telegram.ext import ContextTypes, CallbackQueryHandler, ApplicationHandlerS
 from database.DAO.UtenteDAO import UtenteDAO
 
 _CACHE_KEY = "_utente_attivo"
-_CACHE_TTL = 6000  # secondi
+_CACHE_TTL = 300  # secondi
 
 _PATTERN_NECROLOGI = re.compile(r"^necrologi")
 

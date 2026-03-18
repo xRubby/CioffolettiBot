@@ -26,10 +26,10 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     ctx.user_data["lista_defunti_pagina"] = pagina
 
-    tutti = DefuntoDAO().get_tutti_defunti()
-    totale = len(tutti)
+    dao = DefuntoDAO()
     offset = pagina * PAGINA_SIZE
-    defunti_pagina = tutti[offset: offset + PAGINA_SIZE]
+    totale = dao.conta_defunti()
+    defunti_pagina = dao.get_defunti_paginati(offset=offset, limit=PAGINA_SIZE)
 
     if not defunti_pagina and pagina == 0:
         tastiera = InlineKeyboardMarkup([
@@ -63,7 +63,6 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if nav:
         righe.append(nav)
 
-    
     righe.append([InlineKeyboardButton("🔙 Indietro", callback_data="necrologi")])
 
     await query.edit_message_text(
