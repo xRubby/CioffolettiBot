@@ -103,6 +103,23 @@ class AnniversarioDAO:
                 (defunto_id, limit, offset)
             ).fetchall()
         return [self._row_to_anniversario(r) for r in rows]
+    
+    def get_anniversari_in_sospeso(self, oggi: date) -> list[Anniversario]:
+        stati_esclusi = (Stato.FATTO, Stato.NON_FARE)
+        with db_connection.connect() as con:
+            rows = con.execute("""
+                SELECT * FROM anniversari
+                WHERE stato NOT IN (?, ?)
+                AND (
+                    CASE
+                    WHEN data_affissione IS NOT NULL
+                    THEN date(data_affissione, '-3 days')
+                    ELSE data
+                    END
+                ) <= ?
+                ORDER BY data ASC
+            """, (stati_esclusi[0], stati_esclusi[1], oggi.isoformat())).fetchall()
+        return [self._row_to_anniversario(r) for r in rows]
 
     @staticmethod
     def label_numero(numero: int) -> str:

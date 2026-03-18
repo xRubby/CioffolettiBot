@@ -21,7 +21,8 @@ from keyboards.defunti.lista_defunti import (
 from keyboards.defunti.modifica_defunto import (
     conv_modifica_defunto,
 )
-from keyboards.defunti.cose_da_fare import handler_cose_da_fare
+from keyboards.defunti.cose_da_fare import handler_cose_da_fare, handler_anniversari_da_fare
+
 from keyboards.defunti.anniversari import (          # ← nuovo
     conv_aggiungi_anniversario,
     conv_modifica_anniversario,
@@ -79,8 +80,9 @@ def main():
     app.add_handler(CallbackQueryHandler(handler_defunti,        pattern="^necrologi$"))
     app.add_handler(CallbackQueryHandler(handler_lista_defunti,  pattern=r"^necrologi_lista(_p_\d+)?$"))
     app.add_handler(CallbackQueryHandler(handler_scheda_defunto, pattern=r"^necrologi_scheda_\d+$"))
-    app.add_handler(CallbackQueryHandler(handler_cose_da_fare,   pattern=r"^necrologi_cose_da_fare(_p_\d+)?$"))
-
+    app.add_handler(CallbackQueryHandler(handler_cose_da_fare,        pattern=r"^necrologi_cose_da_fare(_p_\d+)?$"))
+    app.add_handler(CallbackQueryHandler(handler_anniversari_da_fare, pattern=r"^necrologi_anniversari_da_fare_p_\d+$"))
+    
     # ── Anniversari ───────────────────────────────────────────────────────────
     app.add_handler(conv_aggiungi_anniversario)
     app.add_handler(conv_modifica_anniversario)
