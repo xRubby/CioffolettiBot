@@ -21,6 +21,7 @@ from utils.guards import gate_necrologi
 from zoneinfo import ZoneInfo
 from config import NOTIFICA_ORA, NOTIFICA_MINUTO, TIMEZONE
 from utils.notifiche import job_notifiche_scadenze
+import datetime
 
 # --- Logging ---
 logging.basicConfig(
@@ -37,6 +38,18 @@ def main():
     db_connection.init_schema()
     
     app = Application.builder().token(TELEGRAM_TOKEN).build()
+
+    # ── Job scheduler ─────────────────────────────
+    job_queue: JobQueue = app.job_queue
+    job_queue.run_daily(
+        job_notifiche_scadenze,
+        time=datetime.time(
+            hour=NOTIFICA_ORA,
+            minute=NOTIFICA_MINUTO,
+            tzinfo=ZoneInfo(TIMEZONE),
+        ),
+        name="notifiche_scadenze",
+    )
 
     app.add_handler(gate_necrologi, group=-1)
 
@@ -66,17 +79,6 @@ def main():
 
     logger.info("Bot Cioffoletti avviato.")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
-
-    job_queue: JobQueue = app.job_queue
-    job_queue.run_daily(
-        job_notifiche_scadenze,
-        time=__import__("datetime").time(
-            hour=NOTIFICA_ORA,
-            minute=NOTIFICA_MINUTO,
-            tzinfo=ZoneInfo(TIMEZONE),
-        ),
-        name="notifiche_scadenze",
-    )
  
  
 if __name__ == "__main__":

@@ -31,6 +31,7 @@ async def job_notifiche_scadenze(ctx: ContextTypes.DEFAULT_TYPE) -> None:
     Per ogni defunto controlla se una scadenza è superata e lo stato non è 'fatto';
     se sì invia un messaggio a tutti gli utenti attivi.
     """
+    print("Notifiche inviate")
     oggi = date.today()
     utenti_attivi = UtenteDAO.get_utenti_attivi()
 
@@ -50,7 +51,7 @@ async def job_notifiche_scadenze(ctx: ContextTypes.DEFAULT_TYPE) -> None:
                 testo = (
                     f"⚠️ <b>Scadenza superata</b>\n\n"
                     f"🪦 <b>{d.cognome} {d.nome}</b>\n"
-                    f"📅 Deceduto il {d.data_decesso.strftime('%d/%m/%Y')} "
+                    f"📅 Deceduto/a il {d.data_decesso.strftime('%d/%m/%Y')} "
                     f"({giorni_trascorsi} giorni fa)\n\n"
                     f"{emoji} <b>{etichetta}:</b> {stato_label}"
                 )
