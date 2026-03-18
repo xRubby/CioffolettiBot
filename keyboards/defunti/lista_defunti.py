@@ -190,6 +190,7 @@ async def handler_scheda_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
     pagina = ctx.user_data.get("lista_defunti_pagina", 0)
 
     tastiera = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📅 Anniversari", callback_data=f"anniv_lista_{defunto_id}")],
         [InlineKeyboardButton("✏️ Modifica informazioni", callback_data=f"necrologi_modifica_{defunto_id}")],
         [InlineKeyboardButton("🔙 Lista defunti", callback_data=f"necrologi_lista_p_{pagina}")],
     ])

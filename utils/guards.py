@@ -7,7 +7,7 @@ from database.DAO.UtenteDAO import UtenteDAO
 _CACHE_KEY = "_utente_attivo"
 _CACHE_TTL = 300  # secondi
 
-_PATTERN_NECROLOGI = re.compile(r"^necrologi")
+_PATTERN_NECROLOGI = re.compile(r"^(necrologi|anniv)")
 
 
 async def utente_attivo(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> bool:

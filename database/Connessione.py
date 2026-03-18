@@ -66,6 +66,17 @@ class DatabaseConnection:
 
                     FOREIGN KEY (aggiunto_da) REFERENCES utenti(id)
                 );
+                              
+                CREATE TABLE IF NOT EXISTS anniversari (
+                    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    defunto_id       INTEGER NOT NULL,
+                    numero           INTEGER NOT NULL DEFAULT 1,
+                    data             TEXT    NOT NULL,
+                    data_affissione  TEXT,
+                    descrizione      TEXT,
+                    stato            TEXT    NOT NULL DEFAULT 'da_fare',
+                    FOREIGN KEY (defunto_id) REFERENCES defunti(id) ON DELETE CASCADE
+                );
             """)
  
  
