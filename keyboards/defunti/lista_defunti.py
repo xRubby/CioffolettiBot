@@ -49,11 +49,17 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         label = f"🪦 {d.cognome} {d.nome} — {d.data_decesso.strftime('%d/%m/%Y')}"
         righe.append([InlineKeyboardButton(label, callback_data=f"necrologi_scheda_{d.id}")])
 
+    n_pagine = -(-totale // PAGINA_SIZE)
+
     nav = []
     if pagina > 0:
+        if n_pagine >= 3:
+            nav.append(InlineKeyboardButton("⏮️", callback_data="necrologi_lista_p_0"))
         nav.append(InlineKeyboardButton("◀️ Prec", callback_data=f"necrologi_lista_p_{pagina - 1}"))
     if offset + PAGINA_SIZE < totale:
         nav.append(InlineKeyboardButton("Succ ▶️", callback_data=f"necrologi_lista_p_{pagina + 1}"))
+        if n_pagine >= 3:
+            nav.append(InlineKeyboardButton("⏭️", callback_data=f"necrologi_lista_p_{n_pagine - 1}"))
     if nav:
         righe.append(nav)
 
