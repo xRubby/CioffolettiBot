@@ -86,3 +86,25 @@ class DefuntoDAO:
                     (a, b, b, a)
                 ).fetchall()
         return [self._row_to_defunto(row) for row in rows]
+    
+    def conta_defunti_in_sospeso(self) -> int:
+        with db_connection.connect() as con:
+            row = con.execute("""
+                SELECT COUNT(*) FROM defunti
+                WHERE stato_ringraziamento IN ('da_fare', 'da_confermare', 'confermato')
+                OR stato_preci          IN ('da_fare', 'da_confermare', 'confermato')
+                OR stato_trigesimo      IN ('da_fare', 'da_confermare', 'confermato')
+            """).fetchone()
+            return row[0]
+
+    def get_defunti_in_sospeso_paginati(self, offset: int, limit: int = 5) -> list[Defunto]:
+        with db_connection.connect() as con:
+            rows = con.execute("""
+                SELECT * FROM defunti
+                WHERE stato_ringraziamento IN ('da_fare', 'da_confermare', 'confermato')
+                OR stato_preci          IN ('da_fare', 'da_confermare', 'confermato')
+                OR stato_trigesimo      IN ('da_fare', 'da_confermare', 'confermato')
+                ORDER BY data_decesso DESC
+                LIMIT ? OFFSET ?
+            """, (limit, offset)).fetchall()
+            return [self._row_to_defunto(row) for row in rows]

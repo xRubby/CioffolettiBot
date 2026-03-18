@@ -15,6 +15,7 @@ from keyboards.defunti.handle_defunti import handler_defunti
 from keyboards.defunti.aggiungi_defunto import conv_aggiungi_defunto
 from keyboards.defunti.lista_defunti import *
 from keyboards.defunti.modifica_defunto import *
+from keyboards.defunti.cose_da_fare import handler_cose_da_fare
 
 from utils.guards import gate_necrologi
 
@@ -63,6 +64,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handler_defunti,        pattern="^necrologi$"))
     app.add_handler(CallbackQueryHandler(handler_lista_defunti,  pattern=r"^necrologi_lista(_p_\d+)?$"))
     app.add_handler(CallbackQueryHandler(handler_scheda_defunto, pattern=r"^necrologi_scheda_\d+$"))
+    app.add_handler(CallbackQueryHandler(handler_cose_da_fare,   pattern=r"^necrologi_cose_da_fare(_p_\d+)?$"))
  
     # ── Impostazioni ─────────────────────────────────────────────────────────
     app.add_handler(CallbackQueryHandler(handler_impostazioni, pattern="^impostazioni$"))
