@@ -492,6 +492,12 @@ async def handler_aggiungi_conferma(update: Update, ctx: ContextTypes.DEFAULT_TY
                                   parse_mode="Markdown", reply_markup=tastiera)
     return ConversationHandler.END
 
+async def handler_annulla_aggiungi(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    ctx.user_data.pop("new_anniv", None)
+    ctx.user_data.pop("anniv_defunto_id", None)
+    await handler_lista_anniversari(update, ctx)
+    return ConversationHandler.END
+
 async def handler_annulla_modifica(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -537,21 +543,25 @@ conv_aggiungi_anniversario = ConversationHandler(
     states={
         AGGIUNGI_DATA: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, handler_aggiungi_data),
+            CallbackQueryHandler(handler_annulla_aggiungi, pattern=r"^anniv_lista_\d+$"),
         ],
         AGGIUNGI_AFFISSIONE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, handler_aggiungi_affissione),
             CallbackQueryHandler(handler_salta_affissione, pattern=r"^anniv_aggiungi_salta_\d+$"),
+            CallbackQueryHandler(handler_annulla_aggiungi, pattern=r"^anniv_lista_\d+$"),
         ],
         AGGIUNGI_DESCRIZIONE: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, handler_aggiungi_descrizione),
             CallbackQueryHandler(handler_salta_descrizione, pattern=r"^anniv_aggiungi_salta_\d+$"),
+            CallbackQueryHandler(handler_annulla_aggiungi, pattern=r"^anniv_lista_\d+$"),
         ],
         AGGIUNGI_CONFERMA: [
             CallbackQueryHandler(handler_aggiungi_conferma, pattern=r"^anniv_aggiungi_conferma$"),
+            CallbackQueryHandler(handler_annulla_aggiungi, pattern=r"^anniv_lista_\d+$"),
         ],
     },
     fallbacks=[
-        CallbackQueryHandler(handler_lista_anniversari, pattern=r"^anniv_lista_\d+$"),
+        CallbackQueryHandler(handler_annulla_aggiungi, pattern=r"^anniv_lista_\d+$"),
     ],
     per_message=False,
     per_chat=True,
