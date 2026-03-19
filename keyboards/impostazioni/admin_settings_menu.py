@@ -112,7 +112,6 @@ async def handler_toggle_admin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     else:
         UtenteDAO.rendi_admin(utente_id)
 
-    query.data = f"impostazioni_admin_utente_{utente_id}"
     await handler_utente(update, ctx)
 
 
@@ -127,7 +126,6 @@ async def handler_toggle_stato(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     else:
         UtenteDAO.riattiva_utente(utente_id)
 
-    query.data = f"impostazioni_admin_utente_{utente_id}"
     await handler_utente(update, ctx)
 
 
