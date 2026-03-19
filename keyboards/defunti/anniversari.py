@@ -157,8 +157,8 @@ async def handler_salva_stato(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     AnniversarioDAO().aggiorna_stato(anniversario_id, stato)
 
-    query.data = f"anniv_scheda_{anniversario_id}"
-    await handler_scheda_anniversario(update, ctx)
+    ctx.user_data["anniv_msg_id"] = query.message.message_id
+    await _mostra_scheda(ctx, update.effective_chat.id, anniversario_id)
 
 
 # ── Modifica anniversario ─────────────────────────────────────────────────────
