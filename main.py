@@ -23,7 +23,7 @@ from keyboards.defunti.modifica_defunto import (
 )
 from keyboards.defunti.cose_da_fare import handler_cose_da_fare, handler_anniversari_da_fare
 
-from keyboards.defunti.anniversari import (          # ← nuovo
+from keyboards.defunti.anniversari import (          
     conv_aggiungi_anniversario,
     conv_modifica_anniversario,
     handler_lista_anniversari,
@@ -34,7 +34,7 @@ from keyboards.defunti.anniversari import (          # ← nuovo
     handler_elimina_conferma,
 )
 
-from utils.guards import gate_necrologi
+from utils.guards import gate_necrologi, gate_admin
 
 from zoneinfo import ZoneInfo
 from config import NOTIFICA_ORA, NOTIFICA_MINUTO, TIMEZONE
@@ -69,6 +69,7 @@ def main():
     )
 
     app.add_handler(gate_necrologi, group=-1)
+    app.add_handler(gate_admin, group=-1)
 
     app.add_handler(CommandHandler("start", cmd_start))
 

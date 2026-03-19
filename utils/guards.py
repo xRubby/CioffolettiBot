@@ -39,6 +39,31 @@ async def utente_attivo(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> bool:
 async def _check_necrologi(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not await utente_attivo(update, ctx):
         raise ApplicationHandlerStop
+    
+
+
+_PATTERN_ADMIN = re.compile(r"^(impostazioni_admin|cerca_utente)")
+
+async def utente_admin(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> bool:
+    utente = UtenteDAO.get_utente_by_telegram_id(update.effective_user.id)
+    admin = bool(utente and utente.is_admin)
+
+    if not admin and update.callback_query:
+        await update.callback_query.answer("🚫 Accesso riservato agli amministratori.", show_alert=True)
+
+    return admin
+
+
+async def _check_admin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if not await utente_admin(update, ctx):
+        raise ApplicationHandlerStop
+
+
+gate_admin = CallbackQueryHandler(_check_admin, pattern=_PATTERN_ADMIN)
 
 
 gate_necrologi = CallbackQueryHandler(_check_necrologi, pattern=_PATTERN_NECROLOGI)
+
+
+
+
