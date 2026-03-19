@@ -15,7 +15,7 @@ LEGENDA = (
     f"🟡 Da confermare\n"
     f"🟢 Confermato\n\n"
     f"*Attività defunti:*\n"
-    f"📬 Ringraziamento · 🙏 Preci · 📿 Trigesimo\n\n"
+    f"📬 Ringraziamento\n🙏 Preci\n📿 Trigesimo\n\n"
     f"*Attività anniversari:*\n"
     f"📅 Anniversario in scadenza"
 )
