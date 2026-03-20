@@ -187,8 +187,8 @@ async def handler_scheda_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
         f"📝 <b>Note:</b> {note_str}\n"
     )
 
-    ctx.user_data.pop("anniv_defunto_nome")
-    ctx.user_data.pop("anniv_defunto_cognome")
+    ctx.user_data.pop("anniv_defunto_nome", "")
+    ctx.user_data.pop("anniv_defunto_cognome", "")
 
     pagina = ctx.user_data.get("lista_defunti_pagina", 0)
 
