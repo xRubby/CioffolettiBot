@@ -25,6 +25,7 @@ async def handler_lista_defunti(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         pagina = 0
 
     ctx.user_data["lista_defunti_pagina"] = pagina
+    ctx.user_data.pop("from_cose_da_fare", False)
 
     dao = DefuntoDAO()
     offset = pagina * PAGINA_SIZE
@@ -174,6 +175,8 @@ async def handler_scheda_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
     nome_del_str = d.nome_delegante if d.nome_delegante else "—"
     note_str     = d.note if d.note else "—"
 
+    
+
     testo = (
         f"🪦 <b>{d.cognome} {d.nome}</b>\n\n"
         f"📅 <b>Data decesso:</b> {d.data_decesso.strftime('%d/%m/%Y')}\n"
@@ -192,10 +195,16 @@ async def handler_scheda_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
 
     pagina = ctx.user_data.get("lista_defunti_pagina", 0)
 
+    testo_callback_data = f"necrologi_lista_p_{pagina}"
+
+    from_cose_da_fare = ctx.user_data.pop("from_cose_da_fare", False)
+    if from_cose_da_fare:
+        testo_callback_data = "necrologi_cose_da_fare"
+
     tastiera = InlineKeyboardMarkup([
         [InlineKeyboardButton("📅 Anniversari", callback_data=f"anniv_lista_{defunto_id}")],
         [InlineKeyboardButton("✏️ Modifica informazioni", callback_data=f"necrologi_modifica_{defunto_id}")],
-        [InlineKeyboardButton("🔙 Lista defunti", callback_data=f"necrologi_lista_p_{pagina}")],
+        [InlineKeyboardButton("🔙 Lista defunti", callback_data=testo_callback_data)],
     ])
 
     await query.edit_message_text(testo, parse_mode="HTML", reply_markup=tastiera)

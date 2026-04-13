@@ -62,6 +62,9 @@ async def handler_cose_da_fare(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     # ── Sezione defunti ───────────────────────────────────────────────────────
     if totale_defunti > 0:
+
+        ctx.user_data["from_cose_da_fare"] = True
+
         defunti = dao.get_defunti_in_sospeso_paginati(offset=offset, limit=PAGINA_SIZE)
 
         for d in defunti:
