@@ -197,7 +197,7 @@ async def handler_scheda_defunto(update: Update, ctx: ContextTypes.DEFAULT_TYPE)
 
     testo_callback_data = f"necrologi_lista_p_{pagina}"
 
-    from_cose_da_fare = ctx.user_data.pop("from_cose_da_fare", False)
+    from_cose_da_fare = ctx.user_data.get("from_cose_da_fare", False)
     if from_cose_da_fare:
         testo_callback_data = "necrologi_cose_da_fare"
 

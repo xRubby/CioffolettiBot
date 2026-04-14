@@ -66,6 +66,7 @@ def main():
             tzinfo=ZoneInfo(TIMEZONE),
         ),
         name="notifiche_scadenze",
+        job_kwargs={"misfire_grace_time": 60},
     )
 
     app.add_handler(gate_necrologi, group=-1)

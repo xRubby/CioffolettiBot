@@ -22,7 +22,7 @@ GIORNI_TRIGESIMO:      int = 17
  
 # ── Job scheduler ────────────────────────────────────────────────────────────
 NOTIFICA_ORA:    int = 8
-NOTIFICA_MINUTO: int = 0
+NOTIFICA_MINUTO: int = 00
 TIMEZONE:        str = "Europe/Rome"
 
 # ── Stati defunto ────────────────────────────────────────────────────────────
